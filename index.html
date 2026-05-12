@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>STUDY HIGH!! — 頂の成績へ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  :root{
+    --ink:#0f0f10;
+    --ink-2:#1c1c1f;
+    --paper:#fbf7f1;
+    --paper-2:#f4ead9;
+    --orange:#ff7a18;
+    --orange-2:#ff5a00;
+    --orange-deep:#c93c00;
+    --line:rgba(15,15,16,.12);
+    --shadow:0 10px 30px rgba(15,15,16,.12), 0 2px 6px rgba(15,15,16,.08);
+    --shadow-hi:0 26px 60px rgba(201,60,0,.28), 0 6px 16px rgba(15,15,16,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Noto Sans JP", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* ───── canvas paper texture ───── */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(1200px 800px at 80% -10%, rgba(255,122,24,.10), transparent 60%),
+      radial-gradient(900px 700px at -10% 110%, rgba(15,15,16,.06), transparent 60%);
+  }
+  .grain{
+    position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ───── top bar ───── */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;
+    background:rgba(251,247,241,.78);
+    backdrop-filter:saturate(140%) blur(12px);
+    -webkit-backdrop-filter:saturate(140%) blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:12px;font-family:"Bangers",cursive;letter-spacing:.06em;font-size:22px}
+  .brand .dot{
+    width:28px;height:28px;border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, #ffd9a0 0 12%, transparent 13%),
+      conic-gradient(from 20deg, var(--orange) 0 25%, var(--ink) 0 33%, var(--orange) 0 58%, var(--ink) 0 66%, var(--orange) 0 92%, var(--ink) 0);
+    box-shadow:inset 0 0 0 2px rgba(15,15,16,.5);
+  }
+  .top-nav{display:flex;gap:10px;flex-wrap:wrap}
+  .top-nav a{
+    text-decoration:none;color:var(--ink);
+    font-weight:700;font-size:14px;letter-spacing:.04em;
+    padding:10px 14px;border-radius:999px;border:1.5px solid var(--ink);
+    transition:transform .2s ease, background .2s, color .2s;
+    min-height:44px;display:inline-flex;align-items:center;
+  }
+  .top-nav a:hover{background:var(--ink);color:var(--paper)}
+
+  /* ───── hero ───── */
+  .hero{
+    position:relative;z-index:2;
+    padding:64px 6vw 80px;
+    overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;
+    max-width:1400px;margin:0 auto;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-weight:900;letter-spacing:.22em;font-size:13px;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);
+    padding:8px 14px;border-radius:4px;
+    transform:rotate(-2deg);
+  }
+  .eyebrow .stripe{width:10px;height:10px;background:var(--orange);display:inline-block}
+  h1.title{
+    font-family:"Bangers","Bebas Neue",sans-serif;
+    font-weight:400;
+    font-size:clamp(64px, 9.5vw, 168px);
+    line-height:.86;letter-spacing:.01em;
+    margin:18px 0 8px;
+    color:var(--ink);
+    text-shadow:6px 6px 0 var(--orange);
+  }
+  h1.title .accent{ color:var(--orange); text-shadow:6px 6px 0 var(--ink); }
+  h1.title .bang{ display:inline-block; transform:translateY(.06em) rotate(8deg); color:var(--ink); -webkit-text-stroke:2px var(--ink); text-shadow:6px 6px 0 var(--orange); }
+  .subtitle-jp{
+    font-family:"Noto Sans JP",sans-serif;font-weight:900;
+    font-size:clamp(22px,2.6vw,36px);
+    margin:6px 0 22px;letter-spacing:.04em;
+    display:flex;align-items:center;gap:14px;
+  }
+  .subtitle-jp .bar{flex:0 0 56px;height:4px;background:var(--orange)}
+  .lead{
+    font-size:clamp(15px,1.4vw,18px); line-height:1.85; max-width:56ch;
+    color:#2a2a2e;
+  }
+  .lead strong{ background:linear-gradient(transparent 60%, rgba(255,122,24,.45) 60%); }
+
+  .hero-ctas{display:flex;gap:14px;margin-top:26px;flex-wrap:wrap}
+  .btn{
+    --bg:var(--ink); --fg:var(--paper);
+    display:inline-flex;align-items:center;gap:12px;
+    background:var(--bg);color:var(--fg);
+    padding:18px 26px;border-radius:14px;
+    font-weight:900;letter-spacing:.06em;font-size:15px;
+    text-decoration:none;border:none;cursor:pointer;
+    min-height:56px;
+    box-shadow:0 8px 0 0 rgba(15,15,16,.85), var(--shadow);
+    transition:transform .15s ease, box-shadow .15s ease, background .2s;
+  }
+  .btn:hover{ transform:translateY(2px); box-shadow:0 6px 0 0 rgba(15,15,16,.85), var(--shadow); }
+  .btn:active{ transform:translateY(8px); box-shadow:0 0 0 0 rgba(15,15,16,.85), var(--shadow); }
+  .btn.primary{ --bg:var(--orange); --fg:#fff; box-shadow:0 8px 0 0 var(--orange-deep), var(--shadow); }
+  .btn.primary:hover{ box-shadow:0 6px 0 0 var(--orange-deep), var(--shadow); }
+  .btn.primary:active{ box-shadow:0 0 0 0 var(--orange-deep), var(--shadow); }
+  .btn i{font-size:18px}
+
+  /* Hero ball + court */
+  .hero-art{ position:relative; aspect-ratio:1/1; max-width:560px; justify-self:end; width:100%; }
+  .court{
+    position:absolute; inset:8% 6% 6% 8%;
+    border:3px solid var(--ink);
+    background:
+      repeating-linear-gradient(45deg, rgba(255,122,24,.08) 0 14px, transparent 14px 28px);
+    border-radius:6px;
+    transform:rotate(-6deg);
+    box-shadow:14px 14px 0 var(--ink);
+  }
+  .court::before{
+    content:""; position:absolute; left:50%; top:-12px; bottom:-12px; width:6px;
+    background:repeating-linear-gradient(to bottom, var(--ink) 0 8px, transparent 8px 16px);
+    transform:translateX(-50%);
+  }
+  .court::after{
+    content:""; position:absolute; left:-3px; right:-3px; top:50%;
+    height:0; border-top:3px dashed rgba(15,15,16,.45);
+  }
+  .ball{
+    position:absolute; left:18%; top:8%;
+    width:46%; aspect-ratio:1/1; border-radius:50%;
+    background:
+      radial-gradient(circle at 32% 28%, #fff7e6 0 10%, #ffe0a8 35%, #ffb24d 70%, #d57a14 100%);
+    box-shadow:
+      inset -16px -22px 30px rgba(0,0,0,.28),
+      inset 10px 10px 16px rgba(255,255,255,.45),
+      0 26px 40px rgba(15,15,16,.25);
+    animation:float 4s ease-in-out infinite;
+  }
+  .ball::before, .ball::after{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    border:3px solid rgba(15,15,16,.7);
+    -webkit-mask:radial-gradient(circle at 50% 50%, transparent 0 48%, #000 49%);
+            mask:radial-gradient(circle at 50% 50%, transparent 0 48%, #000 49%);
+  }
+  .ball::before{
+    background:
+      radial-gradient(circle at 50% -20%, transparent 38%, rgba(15,15,16,.7) 39%, rgba(15,15,16,.7) 41%, transparent 42%),
+      radial-gradient(circle at 50% 120%, transparent 38%, rgba(15,15,16,.7) 39%, rgba(15,15,16,.7) 41%, transparent 42%);
+    -webkit-mask:none; mask:none; border:none;
+  }
+  .ball::after{
+    background:
+      radial-gradient(circle at -20% 50%, transparent 38%, rgba(15,15,16,.7) 39%, rgba(15,15,16,.7) 41%, transparent 42%),
+      radial-gradient(circle at 120% 50%, transparent 38%, rgba(15,15,16,.7) 39%, rgba(15,15,16,.7) 41%, transparent 42%);
+    -webkit-mask:none; mask:none; border:none;
+  }
+  .ball .seam-c{
+    position:absolute; inset:6%; border-radius:50%;
+    border:3px solid rgba(15,15,16,.7);
+    clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+  @keyframes float {
+    0%,100%{ transform:translateY(0) rotate(-8deg); }
+    50%{ transform:translateY(-22px) rotate(6deg); }
+  }
+  .shadow-ground{
+    position:absolute; left:22%; bottom:6%; width:42%; height:18px;
+    background:radial-gradient(ellipse at center, rgba(15,15,16,.35), rgba(15,15,16,0) 70%);
+    filter:blur(2px);
+    animation:shadowpulse 4s ease-in-out infinite;
+  }
+  @keyframes shadowpulse {
+    0%,100%{ transform:scale(1); opacity:.9 }
+    50%{ transform:scale(.6); opacity:.55 }
+  }
+  .speedlines{ position:absolute; inset:0; pointer-events:none; opacity:.5 }
+  .speedlines i{
+    position:absolute; height:3px; background:var(--ink); border-radius:2px;
+  }
+
+  /* Sticker chips */
+  .sticker-row{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:22px;
+  }
+  .sticker{
+    background:var(--paper); border:2px solid var(--ink); border-radius:999px;
+    padding:8px 14px; font-weight:900; font-size:12px; letter-spacing:.1em;
+    box-shadow:3px 3px 0 var(--ink);
+    transform:rotate(-2deg);
+  }
+  .sticker:nth-child(2){ transform:rotate(3deg); background:var(--orange); color:#fff }
+  .sticker:nth-child(3){ transform:rotate(-1deg) }
+
+  /* ───── section header ───── */
+  section.block{ position:relative; z-index:2; padding:80px 6vw; }
+  .sec-head{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+    max-width:1400px; margin:0 auto 36px;
+    border-bottom:3px solid var(--ink); padding-bottom:18px;
+  }
+  .sec-head h2{
+    font-family:"Bangers","Bebas Neue",sans-serif; font-weight:400;
+    font-size:clamp(40px, 6vw, 84px); letter-spacing:.02em; line-height:.95;
+    margin:0;
+  }
+  .sec-head h2 .o{ color:var(--orange) }
+  .sec-head .meta{ font-weight:900; letter-spacing:.2em; font-size:12px; color:#5b5b60 }
+
+  /* ───── lineup cards (apps) ───── */
+  .lineup{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:28px;
+    max-width:1400px; margin:0 auto;
+  }
+  .card{
+    position:relative; background:var(--paper);
+    border:2.5px solid var(--ink); border-radius:22px; padding:30px;
+    overflow:hidden; isolation:isolate;
+    box-shadow:10px 10px 0 var(--ink);
+    transition:transform .25s ease, box-shadow .25s ease;
+    text-decoration:none; color:inherit; display:block;
+    min-height:340px;
+  }
+  .card:hover{ transform:translate(-4px,-6px); box-shadow:14px 14px 0 var(--orange-deep); }
+  .card:active{ transform:translate(6px,6px); box-shadow:2px 2px 0 var(--ink); }
+  .card .jersey{
+    position:absolute; top:-24px; right:-24px;
+    font-family:"Bangers","Bebas Neue",sans-serif;
+    font-size:240px; line-height:1; color:var(--paper-2);
+    z-index:0; user-select:none;
+  }
+  .card .position{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:"Bangers","Bebas Neue",sans-serif; letter-spacing:.05em;
+    font-size:22px; color:#fff; background:var(--ink);
+    padding:8px 14px; border-radius:6px;
+    position:relative; z-index:1;
+  }
+  .card .position .num{ background:var(--orange); color:var(--ink); padding:2px 8px; border-radius:4px; font-weight:900; font-family:"Bebas Neue",sans-serif; }
+  .card h3{
+    font-family:"Bangers","Bebas Neue",sans-serif; font-weight:400;
+    font-size:clamp(36px,4.4vw,58px); margin:14px 0 4px; letter-spacing:.02em;
+    color:var(--ink); position:relative; z-index:1;
+  }
+  .card .subject{
+    display:inline-flex; align-items:center; gap:10px;
+    font-weight:900; font-size:14px; letter-spacing:.18em;
+    color:var(--orange-deep); position:relative; z-index:1;
+  }
+  .card .subject::before{ content:""; width:18px; height:3px; background:var(--orange) }
+  .card p.role{
+    margin:14px 0 18px; max-width:46ch; line-height:1.75;
+    font-size:15px; color:#2a2a2e; position:relative; z-index:1;
+  }
+  .card .stats{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; position:relative; z-index:1;
+  }
+  .stat{
+    background:#fff; border:1.5px solid var(--line);
+    border-radius:8px; padding:8px 12px;
+    font-size:12px; font-weight:700; letter-spacing:.05em;
+  }
+  .stat b{ color:var(--orange-deep); font-family:"Bebas Neue",sans-serif; font-size:18px; margin-right:6px; letter-spacing:.04em; }
+  .card .go{
+    display:inline-flex; align-items:center; gap:10px;
+    font-weight:900; font-size:14px; letter-spacing:.1em;
+    color:var(--ink); position:relative; z-index:1;
+    padding:14px 18px; border-radius:12px; background:var(--orange);
+    box-shadow:0 5px 0 var(--orange-deep);
+    min-height:48px;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .card:hover .go{ transform:translateY(1px); box-shadow:0 4px 0 var(--orange-deep); }
+  .card .go .ball-mini{
+    width:22px;height:22px;border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, #fff 0 18%, #ffd9a0 30%, #ff9d3d 100%);
+    box-shadow:inset -4px -5px 7px rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.2);
+    position:relative; overflow:hidden;
+  }
+  .card .go .ball-mini::before, .card .go .ball-mini::after{
+    content:""; position:absolute; inset:0;
+    border:1.5px solid rgba(15,15,16,.6); border-radius:50%;
+  }
+  .card .go .ball-mini::before{ transform:rotate(35deg); border-width:0 1.5px; }
+  .card .go .ball-mini::after{ transform:rotate(-35deg); border-width:0 1.5px; }
+
+  /* Uniform top stripe — fixed height so it only sits behind the position pill,
+     never under the h3 title (avoids black-on-black). */
+  .card.uniform-1{ background:linear-gradient(180deg,#ffffff 0 86px, var(--paper) 86px); }
+  .card.uniform-2{ background:linear-gradient(180deg,var(--ink) 0 86px, var(--paper) 86px); }
+  .card.uniform-2 .position{ background:#fff; color:var(--ink) }
+  .card.uniform-2 .position .num{ background:var(--orange) }
+  .card.uniform-3{ background:linear-gradient(180deg,var(--orange) 0 86px, var(--paper) 86px); }
+  .card.uniform-4{ background:linear-gradient(180deg,#ffffff 0 86px, var(--paper) 86px); }
+
+  /* ───── special message ───── */
+  .message{
+    background:var(--ink); color:var(--paper);
+    border-radius:30px; padding:64px 6vw;
+    max-width:1400px; margin:40px auto; position:relative; overflow:hidden;
+  }
+  .message::before{
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(800px 400px at 100% 0%, rgba(255,122,24,.35), transparent 60%),
+      radial-gradient(700px 500px at 0% 100%, rgba(255,122,24,.18), transparent 60%);
+    pointer-events:none;
+  }
+  .scoreboard{
+    display:flex; align-items:center; gap:14px; margin-bottom:18px;
+    font-family:"Bebas Neue",sans-serif; letter-spacing:.18em; font-size:14px;
+    color:#ffb277;
+  }
+  .scoreboard .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px rgba(255,122,24,.2)}
+  .message blockquote{
+    margin:0; font-family:"Noto Sans JP",sans-serif; font-weight:900;
+    font-size:clamp(28px, 4.4vw, 60px); line-height:1.35; letter-spacing:.02em;
+    max-width:22ch;
+  }
+  .message blockquote .hl{ color:var(--orange) }
+  .message blockquote .small{ display:block; font-size:.55em; margin-top:18px; font-weight:700; color:#dcd6cc; letter-spacing:.04em; }
+  .message .side{
+    position:absolute; right:-30px; bottom:-30px;
+    font-family:"Bangers","Bebas Neue",sans-serif; font-size:260px; line-height:1;
+    color:rgba(255,255,255,.05); pointer-events:none; user-select:none;
+  }
+
+  /* ───── playbook (how to use) ───── */
+  .playbook{ max-width:1400px; margin:0 auto; }
+  .play-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:22px;
+  }
+  .play{
+    background:#fff; border:2px solid var(--ink); border-radius:18px; padding:24px;
+    position:relative;
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .play .step{
+    position:absolute; top:-18px; left:-18px;
+    width:54px;height:54px;border-radius:50%;
+    background:var(--orange); color:var(--ink);
+    font-family:"Bangers",sans-serif; font-size:30px;
+    display:flex;align-items:center;justify-content:center;
+    border:2.5px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .play h4{ font-family:"Bangers",sans-serif; font-weight:400; font-size:26px; margin:8px 0 6px; letter-spacing:.03em }
+  .play p{ margin:0; font-size:14px; line-height:1.7; color:#2a2a2e }
+
+  /* ───── footer (signature) ───── */
+  footer.sig{
+    background:var(--paper-2);
+    border-top:3px solid var(--ink);
+    padding:64px 6vw 80px;
+    position:relative; z-index:2;
+  }
+  .sig-wrap{
+    max-width:1400px; margin:0 auto;
+    display:grid; grid-template-columns:1.2fr 1fr; gap:36px; align-items:center;
+  }
+  .sig-card{
+    background:var(--paper); border:2px solid var(--ink); border-radius:20px;
+    padding:34px; box-shadow:10px 10px 0 var(--ink);
+    transform:rotate(-1deg);
+  }
+  .sig-card h3{
+    font-family:"Bangers",sans-serif; font-weight:400; font-size:42px; margin:0 0 10px; letter-spacing:.03em;
+  }
+  .sig-card p{ font-size:15px; line-height:1.8; margin:0 0 14px; color:#2a2a2e }
+  .sig-name{
+    display:flex; align-items:center; gap:14px; margin-top:18px;
+    font-family:"Noto Sans JP",sans-serif; font-weight:900; font-size:18px;
+  }
+  .sig-name .stamp{
+    width:64px;height:64px;border-radius:50%;border:3px solid var(--orange-deep);
+    color:var(--orange-deep); display:flex;align-items:center;justify-content:center;
+    font-family:"Noto Sans JP",sans-serif; font-weight:900; font-size:18px;
+    transform:rotate(-12deg);
+    background:rgba(255,255,255,.5);
+  }
+  .sig-meta{
+    font-size:13px; line-height:1.9;
+  }
+  .sig-meta .row{ display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px dashed var(--line); }
+  .sig-meta .row i{ color:var(--orange-deep); margin-top:4px; width:18px; text-align:center }
+  .sig-meta .row b{ display:block; font-size:11px; letter-spacing:.18em; color:#5b5b60; margin-bottom:2px }
+
+  /* ───── reveal ───── */
+  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  .reveal-stagger > *{ opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal-stagger.in > *{ opacity:1; transform:none; }
+  .reveal-stagger.in > *:nth-child(1){ transition-delay:.05s }
+  .reveal-stagger.in > *:nth-child(2){ transition-delay:.15s }
+  .reveal-stagger.in > *:nth-child(3){ transition-delay:.25s }
+  .reveal-stagger.in > *:nth-child(4){ transition-delay:.35s }
+
+  /* Bounce on tap */
+  @keyframes ballbounce {
+    0%   { transform:translateY(0) scale(1); }
+    35%  { transform:translateY(-18px) scale(1.04,.96); }
+    55%  { transform:translateY(0) scale(.94,1.08); }
+    75%  { transform:translateY(-8px) scale(1.02,.98); }
+    100% { transform:translateY(0) scale(1); }
+  }
+  .ball-anim{ animation:ballbounce .7s cubic-bezier(.2,.8,.3,1.2); }
+
+  /* ───── iPad / responsive ───── */
+  @media (max-width: 1100px){
+    .hero{ padding:48px 5vw 60px }
+    .hero-grid{ grid-template-columns:1.1fr .9fr; gap:30px }
+    .lineup{ grid-template-columns:1fr 1fr; gap:22px }
+    .play-grid{ grid-template-columns:1fr 1fr }
+    .sig-wrap{ grid-template-columns:1fr; }
+  }
+  @media (max-width: 820px){
+    .topbar{ padding:12px 18px }
+    .top-nav a{ padding:8px 12px; font-size:13px }
+    .hero{ padding:36px 6vw 40px }
+    .hero-grid{ grid-template-columns:1fr; gap:18px }
+    .hero-art{ justify-self:center; max-width:80vw }
+    h1.title{ text-shadow:4px 4px 0 var(--orange); }
+    h1.title .accent{ text-shadow:4px 4px 0 var(--ink); }
+    section.block{ padding:56px 5vw }
+    .lineup{ grid-template-columns:1fr; gap:18px }
+    .card{ min-height:auto }
+    .card .jersey{ font-size:180px }
+    .play-grid{ grid-template-columns:1fr }
+    .message blockquote{ font-size:clamp(24px,7vw,40px) }
+    .sec-head{ flex-direction:column; align-items:flex-start; gap:8px }
+  }
+  /* iPad landscape comfort */
+  @media (min-width:1024px) and (max-width:1366px){
+    .hero{ min-height:calc(100vh - 64px); display:flex; align-items:center; padding-block:40px }
+    .hero-grid{ width:100%; }
+  }
+
+  /* big tap targets minimum */
+  a, button{ touch-action:manipulation; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ───── TOP BAR ───── -->
+<header class="topbar">
+  <div class="brand"><span class="dot" aria-hidden="true"></span> STUDY HIGH<span style="color:var(--orange)">!!</span></div>
+  <nav class="top-nav" aria-label="セクションリンク">
+    <a href="#lineup"><i class="fa-solid fa-people-group"></i>&nbsp;LINEUP</a>
+    <a href="#message"><i class="fa-solid fa-bullhorn"></i>&nbsp;エール</a>
+    <a href="#playbook"><i class="fa-solid fa-book-open"></i>&nbsp;使い方</a>
+    <a href="#sig"><i class="fa-solid fa-signature"></i>&nbsp;父より</a>
+  </nav>
+</header>
+
+<!-- ───── HERO ───── -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-left reveal">
+      <span class="eyebrow"><span class="stripe"></span> 父からの差し入れ・受験用アプリ4本</span>
+      <h1 class="title">STUDY <span class="accent">HIGH</span><span class="bang">!!</span></h1>
+      <div class="subtitle-jp"><span class="bar"></span>頂の成績へ、跳べ。</div>
+      <p class="lead">
+        コートの上では、毎回ボールに食らいつく１年生がいる。<br>
+        机の上でも、同じことだ。<br>
+        この４本のアプリは、お前の<strong>「最強の味方」</strong>になるように作った。<br>
+        ノートを開く前に、まずタップ。<strong>１問だけでもいい。</strong><br>
+        積み重ねた１本１本が、いつか<strong>頂の景色</strong>を見せてくれる。
+      </p>
+      <div class="sticker-row">
+        <span class="sticker">★ 父製・無料 ★</span>
+        <span class="sticker">毎日アップデート</span>
+        <span class="sticker">iPadで快適</span>
+      </div>
+      <div class="hero-ctas">
+        <a class="btn primary" href="#lineup"><i class="fa-solid fa-volleyball"></i> ラインナップを見る</a>
+        <a class="btn" href="#message"><i class="fa-solid fa-fire"></i> 父からエール</a>
+      </div>
+    </div>
+
+    <div class="hero-art reveal" aria-hidden="true">
+      <div class="court"></div>
+      <div class="speedlines">
+        <i style="left:6%;top:24%;width:60px;transform:rotate(-12deg)"></i>
+        <i style="left:2%;top:38%;width:90px;transform:rotate(-10deg)"></i>
+        <i style="left:8%;top:54%;width:46px;transform:rotate(-14deg)"></i>
+        <i style="right:6%;top:62%;width:70px;transform:rotate(8deg)"></i>
+        <i style="right:2%;top:78%;width:110px;transform:rotate(6deg)"></i>
+      </div>
+      <div class="ball" id="heroBall">
+        <span class="seam-c"></span>
+      </div>
+      <div class="shadow-ground"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── LINEUP ───── -->
+<section class="block" id="lineup">
+  <div class="sec-head reveal">
+    <h2>STARTING <span class="o">LINEUP</span></h2>
+    <div class="meta">// 04 APPS &nbsp;·&nbsp; 1 TEAM &nbsp;·&nbsp; YOUR SIDE</div>
+  </div>
+
+  <div class="lineup reveal-stagger">
+
+    <!-- ACE -->
+    <a class="card uniform-3" href="https://kobun-app-five.vercel.app/" target="_blank" rel="noopener">
+      <div class="jersey">04</div>
+      <div class="position"><span class="num">#04</span> THE ACE</div>
+      <h3>古文 / KOBUN</h3>
+      <span class="subject">エースアタッカー · 主要得点源</span>
+      <p class="role">
+        ピンチの局面でも、決め切る一本を持つ。助動詞・敬語・和歌——
+        点差を一気に縮める「決定力」を、ここで磨く。難所こそ気持ちよく斬っていけ。
+      </p>
+      <div class="stats">
+        <div class="stat"><b>SPK</b> 助動詞</div>
+        <div class="stat"><b>BLK</b> 敬語</div>
+        <div class="stat"><b>SET</b> 和歌</div>
+      </div>
+      <span class="go ball-target"><span class="ball-mini"></span> 古文アプリを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+    </a>
+
+    <!-- SETTER -->
+    <a class="card uniform-2" href="https://kanbun-app.vercel.app/free" target="_blank" rel="noopener">
+      <div class="jersey">02</div>
+      <div class="position"><span class="num">#02</span> THE SETTER</div>
+      <h3>漢文 / KANBUN</h3>
+      <span class="subject">司令塔 · 全教科の組み立て</span>
+      <p class="role">
+        返り点・再読文字・句法。漢文はリズムの教科。
+        正確に「上げる」セッターのように、お前の論理の精度を一段上げてくれる。短時間で効くやつだ。
+      </p>
+      <div class="stats">
+        <div class="stat"><b>SPK</b> 句法</div>
+        <div class="stat"><b>BLK</b> 再読</div>
+        <div class="stat"><b>SET</b> 訓読</div>
+      </div>
+      <span class="go ball-target"><span class="ball-mini"></span> 漢文アプリを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+    </a>
+
+    <!-- IRON WALL -->
+    <a class="card uniform-2" href="https://physics-velocity-app.vercel.app/" target="_blank" rel="noopener">
+      <div class="jersey">03</div>
+      <div class="position"><span class="num">#03</span> THE IRON WALL</div>
+      <h3>物理 / PHYSICS</h3>
+      <span class="subject">ミドルブロッカー · 失点を防ぐ</span>
+      <p class="role">
+        速度・加速度・力。式の意味が腹に落ちれば、もう失点しない。
+        「鉄壁」のように、苦手をぴしゃりと止めにいく。図を描く、単位を書く——基本に忠実に。
+      </p>
+      <div class="stats">
+        <div class="stat"><b>SPK</b> 等加速度</div>
+        <div class="stat"><b>BLK</b> 力のつり合い</div>
+        <div class="stat"><b>SET</b> v-tグラフ</div>
+      </div>
+      <span class="go ball-target"><span class="ball-mini"></span> 物理アプリを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+    </a>
+
+    <!-- PINCH SERVER -->
+    <a class="card uniform-1" href="https://english-grammar-app-iota.vercel.app/" target="_blank" rel="noopener">
+      <div class="jersey">01</div>
+      <div class="position"><span class="num">#01</span> PINCH SERVER</div>
+      <h3>英文法 / GRAMMAR</h3>
+      <span class="subject">切り札 · 流れを変える一発</span>
+      <p class="role">
+        時制・仮定法・関係詞。ここぞの場面で投入すれば、ゲームの流れが変わる。
+        １サーブで３点取りに行く気持ちで。短い時間でも、毎日コートに立て。
+      </p>
+      <div class="stats">
+        <div class="stat"><b>SPK</b> 時制</div>
+        <div class="stat"><b>BLK</b> 仮定法</div>
+        <div class="stat"><b>SET</b> 関係詞</div>
+      </div>
+      <span class="go ball-target"><span class="ball-mini"></span> 英文法アプリを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+    </a>
+
+  </div>
+</section>
+
+<!-- ───── MESSAGE ───── -->
+<section class="block" id="message" style="padding-top:20px;">
+  <div class="message reveal">
+    <div class="scoreboard">
+      <span class="dot"></span> SET 3 · MATCH POINT · 父より娘へ
+    </div>
+    <blockquote>
+      まだ、<span class="hl">途中</span>だ。<br>
+      落ちたボールを拾うやつが、<br>
+      最後に<span class="hl">頂</span>を見る。
+      <span class="small">— 焦らなくていい。ただし、繋げ。そして、飛べ。</span>
+    </blockquote>
+    <div class="side">FLY</div>
+  </div>
+</section>
+
+<!-- ───── PLAYBOOK ───── -->
+<section class="block" id="playbook" style="padding-top:0;">
+  <div class="sec-head reveal">
+    <h2>DAILY <span class="o">PLAYBOOK</span></h2>
+    <div class="meta">// 3 STEPS &nbsp;·&nbsp; 毎日のルーティン</div>
+  </div>
+  <div class="playbook">
+    <div class="play-grid reveal-stagger">
+      <div class="play">
+        <div class="step">1</div>
+        <h4>朝のサーブ</h4>
+        <p>登校前に英文法を１問。１分でいい。<br>「今日のコート」に立つだけで、頭のエンジンがかかる。</p>
+      </div>
+      <div class="play">
+        <div class="step">2</div>
+        <h4>昼のトス</h4>
+        <p>休み時間に古文 or 漢文を１セット。短文・短時間。<br>得点源を、毎日少しずつ磨こう。</p>
+      </div>
+      <div class="play">
+        <div class="step">3</div>
+        <h4>夜のブロック</h4>
+        <p>寝る前に物理。式の意味を「声に出して」読む。<br>苦手はその日のうちに、壁の前で止めにいけ。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── SIGNATURE / FOOTER ───── -->
+<footer class="sig" id="sig">
+  <div class="sig-wrap">
+    <div class="sig-card reveal">
+      <h3>困った時はいつでも、アップデートするぞ。</h3>
+      <p>
+        バグでも、追加してほしい機能でも、「ここが分かりにくい」でもいい。
+        コートの外から、コーチがずっと見てる。声をかけてくれ。<br>
+        ——どんな試合でも、最後まで味方だ。
+      </p>
+      <div class="sig-name">
+        <div class="stamp">父</div>
+        <div>
+          STUDY HIGH!! — Dev. by お父さん<br>
+          <span style="font-weight:500;font-size:13px;color:#5b5b60">for my daughter · 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-meta reveal">
+      <div class="row"><i class="fa-solid fa-volleyball"></i><div><b>TEAM</b>家・娘専属サポートチーム（監督・コーチ・分析・補給 …全部、父）</div></div>
+      <div class="row"><i class="fa-solid fa-screwdriver-wrench"></i><div><b>UPDATES</b>気付いたら直す。要望があれば即実装。LINEで一言、それでOK。</div></div>
+      <div class="row"><i class="fa-solid fa-hand-holding-heart"></i><div><b>POLICY</b>急がない。比べない。ただ、続けることだけは応援する。</div></div>
+      <div class="row" style="border:none"><i class="fa-solid fa-mountain-sun"></i><div><b>GOAL</b>頂の景色を、お前自身の足で見にいけ。父はその下で旗を振っている。</div></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ───── reveal on scroll ─────
+  const io = new IntersectionObserver((entries)=>{
+    for(const e of entries){
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    }
+  },{threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el=>io.observe(el));
+
+  // ───── ball bounce on tap of CTA / card ─────
+  function attachBounce(selector){
+    document.querySelectorAll(selector).forEach(el=>{
+      el.addEventListener('pointerenter', ()=>{
+        const ball = el.querySelector('.ball-mini');
+        if(!ball) return;
+        ball.classList.remove('ball-anim'); void ball.offsetWidth; ball.classList.add('ball-anim');
+      });
+      el.addEventListener('pointerdown', ()=>{
+        const ball = el.querySelector('.ball-mini');
+        if(!ball) return;
+        ball.classList.remove('ball-anim'); void ball.offsetWidth; ball.classList.add('ball-anim');
+      });
+    });
+  }
+  attachBounce('.card');
+  attachBounce('.go');
+
+  // ───── hero ball: extra bounce when tapped ─────
+  const heroBall = document.getElementById('heroBall');
+  if(heroBall){
+    heroBall.addEventListener('click', ()=>{
+      heroBall.animate(
+        [{transform:'translateY(0) rotate(0deg)'},
+         {transform:'translateY(-60px) rotate(20deg)', offset:.4},
+         {transform:'translateY(0) rotate(0deg)'}],
+        {duration:700, easing:'cubic-bezier(.2,.8,.3,1.2)'}
+      );
+    });
+  }
+
+  // ───── smooth scroll for nav ─────
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click', ev=>{
+      const id = a.getAttribute('href');
+      if(id.length>1){
+        const t = document.querySelector(id);
+        if(t){ ev.preventDefault(); t.scrollIntoView({behavior:'smooth', block:'start'}); }
+      }
+    });
+  });
+</script>
+</body>
+</html>
